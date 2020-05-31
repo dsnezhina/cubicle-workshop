@@ -3,7 +3,7 @@ const path = require('path')
 const databaseFile = path.join(__dirname, '..', '/config/database.json')
 
 
-const saveCube = (cube) => {
+const saveCube = (cube, callback) => {
     getCubes((cubes) => {
         cubes.push(cube)
 
@@ -12,6 +12,7 @@ const saveCube = (cube) => {
                 throw error
             }
             console.log('New cube is successfully stored')
+            callback()
         })
     })
 }
