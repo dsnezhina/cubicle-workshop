@@ -1,19 +1,20 @@
 // TODO: Require Controllers...
 const { Router } = require('express')
-const { getAllCubes: getAllCubes } = require('../controllers/cubes')
-const { getCube } = require('../controllers/database')
-const Cube = require('../models/cubicle')
+const { getAllCubes, getCube } = require('../controllers/cubes')
+const Cube = require('../models/cube')
 
 
 const router = Router();
 
-router.get('/', (req, res) => {
-    getAllCubes((cubes) => {
-        res.render('index', {
-            title: 'Cube Workshop',
-            cubes
-        })
+router.get('/', async (req, res) => {
+
+    const cubes = await getAllCubes()
+
+    res.render('index', {
+        title: 'Cube Workshop',
+        cubes: cubes
     })
+
 });
 
 router.get('/about', (req, res) => {
@@ -29,7 +30,7 @@ router.get('/create', (req, res) => {
 });
 
 router.post('/create', (req, res) => {
-     
+
     const {
         name,
         description,
@@ -37,19 +38,26 @@ router.post('/create', (req, res) => {
         difficultyLevel
     } = req.body
 
-    const cube = new Cube(name, description, imageUrl, difficultyLevel)
-    cube.save(() => {
-        res.redirect('/')
+    const cube = new Cube({ name, description, imageUrl, difficulty: difficultyLevel })
+    cube.save((err) => {
+        if (err) {
+            console.error(err)
+            throw err
+        } else {
+            res.redirect('/')
+        }
     })
 });
 
-router.get('/details/:id', (req, res) => {
-    getCube(req.params.id, (cube) => {
-        res.render('details', {
-            title: 'Details | Cube Workshop',
-            cube
-        })
+router.get('/details/:id', async (req, res) => {
+
+    const cube = await getCube(req.params.id)
+
+    res.render('details', {
+        title: 'Details | Cube Workshop',
+        cube: cube
     })
+
 });
 
 router.get('*', (req, res) => {
