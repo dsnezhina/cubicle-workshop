@@ -2,10 +2,11 @@ const jwt = require('jsonwebtoken')
 const bcrypt = require('bcrypt')
 const User = require('../models/user')
 
-const privateKey = 'CUBE-WORKSHOP-SOFTUNI'
+const env = process.env.NODE_ENV || 'development';
+const config = require('../config/config')[env];
 
 const generateToken = data => {
-    const token = jwt.sign(data, privateKey)
+    const token = jwt.sign(data, config.privateKey)
     return token
 }
 
@@ -56,7 +57,7 @@ const verifyUser = async (req, res) => {
         res.cookie('aid', token)
     }
 
-    
+
 
     return status
 }
