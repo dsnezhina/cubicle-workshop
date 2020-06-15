@@ -1,15 +1,20 @@
 const { Router } = require('express')
 const User = require('../models/user')
-const { saveUser, verifyUser } = require('../controllers/users')
+const { saveUser, verifyUser, guestAccess, getUserStatus } = require('../controllers/users')
+
 
 const router = Router();
 
-router.get('/login', (req, res) => {
-    res.render('loginPage')
+router.get('/login', guestAccess, getUserStatus, (req, res) => {
+    res.render('loginPage', {
+        isLoggedIn: req.isLoggedIn
+    })
 })
 
-router.get('/signup', (req, res) => {
-    res.render('registerPage')
+router.get('/signup', guestAccess, getUserStatus, (req, res) => {
+    res.render('registerPage', {
+        isLoggedIn: req.isLoggedIn
+    })
 })
 
 router.post('/signup', async (req, res) => {

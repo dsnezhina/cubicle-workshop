@@ -3,16 +3,18 @@ const { getAllCubes, getCube, updateCube, getCubeWithAccessories } = require('..
 const { getAccessories } = require('../controllers/accessories')
 const Cube = require('../models/cube')
 const Accessory = require('../models/accessory')
+const { authAccess, getUserStatus, authAccessJSON } = require('../controllers/users')
 
 const router = Router();
 
-router.get('/create/accessory', (req, res) => {
+router.get('/create/accessory', authAccess, getUserStatus, (req, res) => {
     res.render('createAccessory', {
-        title: 'Create Accessory | Cube Workshop'
+        title: 'Create Accessory | Cube Workshop',
+        isLoggedIn: req.isLoggedIn
     })
 });
 
-router.post('/create/accessory', async (req, res) => {
+router.post('/create/accessory', authAccessJSON, async (req, res) => {
     const {
         name,
         description,
@@ -25,7 +27,7 @@ router.post('/create/accessory', async (req, res) => {
     res.redirect('/create/accessory')
 });
 
-router.get('/attach/accessory/:id', async (req, res) => {
+router.get('/attach/accessory/:id', authAccess, getUserStatus, async (req, res) => {
     const cube = await getCube(req.params.id)
     const accessories = await getAccessories()
 
@@ -35,18 +37,16 @@ router.get('/attach/accessory/:id', async (req, res) => {
         return !cubeAccessories.includes(accessoryString)
     })
 
-    console.log(accessories);
-    console.log(notAttachedAccessories)
-
     res.render('attachAccessory', {
-        title: 'Attach  Accessory | Cube Workshop',
+        title: 'Attach Accessory | Cube Workshop',
         cube: cube,
         accessories: notAttachedAccessories,
-        isFullyAttached: cube.accessories.length === accessories.length
+        isFullyAttached: cube.accessories.length === accessories.length,
+        isLoggedIn: req.isLoggedIn
     })
 });
 
-router.post('/attach/accessory/:id', async (req, res) => {
+router.post('/attach/accessory/:id', authAccessJSON, async (req, res) => {
     const {
         accessory
     } = req.body

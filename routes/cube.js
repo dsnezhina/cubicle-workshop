@@ -4,36 +4,43 @@ const { getAccessories } = require('../controllers/accessories')
 const Cube = require('../models/cube')
 const Accessory = require('../models/accessory')
 const jwt = require('jsonwebtoken')
+const { authAccess, getUserStatus, authAccessJSON } = require('../controllers/users')
 
 const env = process.env.NODE_ENV || 'development';
 const config = require('../config/config')[env];
 
 const router = Router();
 
-router.get('/edit', (req, res) => {
-    res.render('editCubePage')
+router.get('/edit', authAccess, getUserStatus, (req, res) => {
+    res.render('editCubePage', {
+        isLoggedIn: req.isLoggedIn
+    })
 })
 
-router.get('/delete', (req, res) => {
-    res.render('DeleteCubePage')
+router.get('/delete', authAccess, getUserStatus, (req, res) => {
+    res.render('DeleteCubePage', {
+        isLoggedIn: req.isLoggedIn
+    })
 })
 
-router.get('/details/:id', async (req, res) => {
+router.get('/details/:id', getUserStatus, async (req, res) => {
     const cube = await getCubeWithAccessories(req.params.id)
 
     res.render('details', {
         title: 'Details | Cube Workshop',
-        ...cube
+        ...cube,
+        isLoggedIn: req.isLoggedIn
     })
 });
 
-router.get('/create', (req, res) => {
+router.get('/create', authAccess, getUserStatus, (req, res) => {
     res.render('create', {
-        title: 'Create Cube | Cube Workshop'
+        title: 'Create Cube | Cube Workshop',
+        isLoggedIn: req.isLoggedIn
     })
 });
 
-router.post('/create', (req, res) => {
+router.post('/create', authAccessJSON,  (req, res) => {
     const {
         name,
         description,
