@@ -1,4 +1,3 @@
-// TODO: Require Controllers...
 const { Router } = require('express')
 const { getAllCubes, getCube, updateCube, getCubeWithAccessories } = require('../controllers/cubes')
 const { getAccessories } = require('../controllers/accessories')
