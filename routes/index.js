@@ -5,7 +5,7 @@ const Cube = require('../models/cube')
 const Accessory = require('../models/accessory')
 const { getUserStatus } = require('../controllers/users')
 
-const router = Router();
+const router = Router()
 
 router.get('/', getUserStatus, async (req, res) => {
     const cubes = await getAllCubes()
@@ -15,13 +15,19 @@ router.get('/', getUserStatus, async (req, res) => {
         cubes: cubes,
         isLoggedIn: req.isLoggedIn
     })
-});
+})
+
+router.get('/logout', (req, res) => {
+    res.clearCookie('aid')
+
+    res.redirect('/')
+})
 
 router.get('/about', getUserStatus, (req, res) => {
     res.render('about', {
         title: 'About | Cube Workshop',
         isLoggedIn: req.isLoggedIn
     })
-});
+})
 
 module.exports = router
