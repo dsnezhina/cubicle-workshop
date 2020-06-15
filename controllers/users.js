@@ -4,6 +4,11 @@ const User = require('../models/user')
 
 const privateKey = 'CUBE-WORKSHOP-SOFTUNI'
 
+const generateToken = data => {
+    const token = jwt.sign(data, privateKey)
+    return token
+}
+
 const saveUser = async (req, res) => {
 
     const {
@@ -20,15 +25,41 @@ const saveUser = async (req, res) => {
 
     const userObject = await user.save()
 
-    const token = jwt.sign({
+    const token = generateToken({
         userId: userObject._id,
         username: userObject.username
-    }, privateKey)
+    })
 
     res.cookie('aid', token)
 
     return true
 }
 
-module.exports = { saveUser }
+const verifyUser = async (req, res) => {
+    const {
+        username,
+        password
+    } = req.body
+
+    //get User by username
+
+    const user = await User.findOne({ username: username })
+
+    const status = bcrypt.compare(password, user.password)
+
+    if (status) {
+        const token = generateToken({
+            userId: user._id,
+            username: user.username
+        })
+
+        res.cookie('aid', token)
+    }
+
+    
+
+    return status
+}
+
+module.exports = { saveUser, verifyUser }
 
