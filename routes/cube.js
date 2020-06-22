@@ -1,5 +1,5 @@
 const { Router } = require('express')
-const { getAllCubes, getCube, updateCube, getCubeWithAccessories } = require('../controllers/cubes')
+const { getAllCubes, getCube, updateCube, getCubeWithAccessories, deleteCube } = require('../controllers/cubes')
 const { getAccessories } = require('../controllers/accessories')
 const Cube = require('../models/cube')
 const Accessory = require('../models/accessory')
@@ -11,23 +11,53 @@ const config = require('../config/config')[env];
 
 const router = Router();
 
-router.get('/edit', authAccess, getUserStatus, (req, res) => {
+router.get('/edit/:id', authAccess, getUserStatus, (req, res) => {
     res.render('editCubePage', {
         isLoggedIn: req.isLoggedIn
     })
 })
 
-router.get('/delete', authAccess, getUserStatus, (req, res) => {
+router.get('/delete/:id', authAccess, getUserStatus, async (req, res) => {
+    const cube = await getCubeWithAccessories(req.params.id)
+
+    const options = [
+        { title: '1 - Very Easy', selected: 1 == cube.difficulty },
+        { title: '2 - Easy', selected: 2 == cube.difficulty },
+        { title: '3 - Medium (Standard 3x3)', selected: 3 == cube.difficultyLevel },
+        { title: '4 - Intermediate', selected: 4 == cube.difficulty },
+        { title: '5 - Expert', selected: 5 == cube.difficulty },
+        { title: '6 - Hardcore', selected: 6 == cube.difficulty },
+    ]
+
     res.render('DeleteCubePage', {
+        title: 'Delete Cube | Cube Workshop',
+        ...cube,
+        options,
         isLoggedIn: req.isLoggedIn
     })
+})
+
+router.post('/delete/:id', authAccess, getUserStatus, async (req, res, next) => {
+    const id = req.params.id
+
+    try {
+        await deleteCube(id)
+        return res.redirect('/')
+
+    } catch (err) {
+        next(err)
+    }
 })
 
 router.get('/details/:id', getUserStatus, async (req, res) => {
     const cube = await getCubeWithAccessories(req.params.id)
 
+    const token = req.cookies['aid']
+    const decodedObject = jwt.verify(token, config.privateKey)
+
     res.render('details', {
         title: 'Details | Cube Workshop',
+        isCreator: cube.creatorId.toString() === decodedObject.userID.toString(),
         ...cube,
         isLoggedIn: req.isLoggedIn
     })
@@ -56,7 +86,7 @@ router.post('/create', authAccessJSON, async (req, res) => {
         description: description.trim(),
         imageUrl,
         difficulty: difficultyLevel,
-        creatorId: decodedObject.userId
+        creatorId: decodedObject.userID
     })
 
     try {
