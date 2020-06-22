@@ -24,7 +24,7 @@ const updateCube = async (cubeId, accessoryId) => {
             $addToSet: {
                 accessories: [accessoryId],
             },
-        });
+        })
         await Accessory.findByIdAndUpdate(accessoryId, {
             $addToSet: {
                 cubes: [cubeId],
@@ -33,6 +33,18 @@ const updateCube = async (cubeId, accessoryId) => {
     } catch (err) {
         return err
     }
+}
+
+const editCube = async (cubeId, name, description, imageUrl, difficultyLevel) => {
+    return await Cube.findByIdAndUpdate(cubeId, {
+        name: name.trim(),
+        description: description.trim(),
+        imageUrl,
+        difficultyLevel
+    }, {
+        runValidators: true
+    })
+
 }
 
 const deleteCube = async (id) => {
@@ -46,5 +58,6 @@ module.exports = {
     getCube,
     updateCube,
     getCubeWithAccessories,
-    deleteCube
+    deleteCube,
+    editCube
 }
