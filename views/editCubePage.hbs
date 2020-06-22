@@ -1,14 +1,20 @@
 <h1>Edit Cube</h1>
+{{> error-message}}
 <div class="form">
-  <form action='/' method="POST">
+  <form action='/edit/{{_id}}' method="POST">
     <label for="name">Name</label>
-    <input type="text" id="name" name="name" value="">
+    <input type="text" id="name" name="name" value="{{this.name}}">
     <label for="name">Description</label>
-    <textarea id="name" name="description"></textarea>
+    <textarea id="name" name="description">{{this.description}}</textarea>
     <label for="image">ImageUrl</label>
-    <input type="text" id="image" name="imageUrl" value="">
+    <input type="text" id="image" name="imageUrl" value="{{this.imageUrl}}">
     <label for="difficulty">Difficulty</label>
     <select id="difficulty" name="difficultyLevel">
+      {{#each options}}
+      {{#if this.selected}}
+      <option value="{{this.difficulty}}" selected>{{this.title}}</option>
+      {{/if}}
+      {{/each}}
       <option value="1">1 - Very Easy</option>
       <option value="2">2 - Easy</option>
       <option value="3">3 - Medium (Standard 3x3)</option>
